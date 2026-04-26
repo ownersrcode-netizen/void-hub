@@ -507,10 +507,11 @@ local function _initN()
     _ng.Name="VoidUI_N"; _ng.ResetOnSpawn=false
     _ng.IgnoreGuiInset=true; _ng.ZIndexBehavior=Enum.ZIndexBehavior.Sibling
     _ng.Parent = LP.PlayerGui
-    _nh = frm(_ng, UDim2.new(0,310,1,0), UDim2.new(1,-326,0,0), T.Bg, 1)
-    local u = lst(_nh,7)
+    _nh = frm(_ng, UDim2.new(0, 310, 1, -10), UDim2.new(1, -320, 0, 0), T.Bg, 1)
+    local u = lst(_nh, 7)
     u.VerticalAlignment = Enum.VerticalAlignment.Bottom
-    pad(_nh,0,0,14,0)
+    u.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    pad(_nh, 0, 0, 14, 0)
 end
 
 function VoidUI:Notify(opts)
@@ -822,25 +823,41 @@ function VoidUI:CreateWindow(opts)
 
     -- главный фрейм
     local mf = Instance.new("Frame")
-    mf.AnchorPoint   = Vector2.new(0.5,0.5)
-    mf.Position      = UDim2.new(0.5,0,0.5,0)
-    mf.Size          = UDim2.new(0.88,0,0.82,0)
+    mf.AnchorPoint      = Vector2.new(0.5, 0.5)
+    mf.Position         = UDim2.new(0.5, 0, 0.5, 0)
+    mf.Size             = UDim2.new(0, maxW, 0, maxH)
     mf.BackgroundColor3 = T.Bg
     mf.BorderSizePixel  = 0
+    mf.ClipsDescendants = false
     mf.Parent = sg
-    corner(mf,12); stroke(mf, T.Border, 1, 0)
+    corner(mf, 12)
+    stroke(mf, T.Border, 1, 0)
 
     local sizeC = Instance.new("UISizeConstraint")
-    sizeC.MinSize=Vector2.new(minW,minH); sizeC.MaxSize=Vector2.new(maxW,maxH)
-    sizeC.Parent = mf
+    sizeC.MinSize = Vector2.new(minW, minH)
+    sizeC.MaxSize = Vector2.new(maxW, maxH)
+    sizeC.Parent  = mf
 
     -- свечение
+    -- свечение убрано в отдельный frame под основным, чтобы не перекрывало контент
+    local glwHolder = Instance.new("Frame")
+    glwHolder.Size = UDim2.new(0, maxW+90, 0, maxH+90)
+    glwHolder.AnchorPoint = Vector2.new(0.5, 0.5)
+    glwHolder.Position = UDim2.new(0.5, 0, 0.5, 0)
+    glwHolder.BackgroundTransparency = 1
+    glwHolder.ZIndex = 0
+    glwHolder.Parent = sg
     local glw = Instance.new("ImageLabel")
-    glw.Size=UDim2.new(1,90,1,90); glw.Position=UDim2.new(0,-45,0,-45)
-    glw.BackgroundTransparency=1; glw.Image="rbxassetid://5028857084"
-    glw.ImageColor3=T.Accent; glw.ImageTransparency=0.88
-    glw.ScaleType=Enum.ScaleType.Slice; glw.SliceCenter=Rect.new(24,24,276,276)
-    glw.ZIndex=0; glw.Parent=mf
+    glw.Size = UDim2.new(1, 0, 1, 0)
+    glw.Position = UDim2.new(0, 0, 0, 0)
+    glw.BackgroundTransparency = 1
+    glw.Image = "rbxassetid://5028857084"
+    glw.ImageColor3 = T.Accent
+    glw.ImageTransparency = 0.88
+    glw.ScaleType = Enum.ScaleType.Slice
+    glw.SliceCenter = Rect.new(24, 24, 276, 276)
+    glw.ZIndex = 0
+    glw.Parent = glwHolder
 
     -- ── тайтлбар ──────────────────────────────────────────────
     local tb = frm(mf, UDim2.new(1,0,0,44), nil, T.BgLight, 0); corner(tb,12)
@@ -877,46 +894,78 @@ function VoidUI:CreateWindow(opts)
     local pinBtn   = ctrlBtn("📌",-82, T.AccentFaded)
 
     -- ── боковая панель ────────────────────────────────────────
-    local sb = frm(mf, UDim2.new(0,158,1,-44), UDim2.new(0,0,0,44), T.BgTab, 0)
-    pad(sb,8,6,28,6); lst(sb,4)
-    frm(mf, UDim2.new(0,1,1,-44), UDim2.new(0,158,0,44), T.Sep, 0)
+    local sb = frm(mf, UDim2.new(0, 158, 1, -44), UDim2.new(0, 0, 0, 44), T.BgTab, 0)
+    pad(sb, 8, 6, 8, 6)
+    lst(sb, 4)
+    -- разделитель sidebar/content
+    frm(mf, UDim2.new(0, 1, 1, -44), UDim2.new(0, 158, 0, 44), T.Sep, 0)
 
     -- поиск
-    local searchBg = frm(sb, UDim2.new(1,0,0,28), nil, T.BgInput, 0); corner(searchBg,7)
+    local searchBg = frm(sb, UDim2.new(1, 0, 0, 28), nil, T.BgInput, 0)
+    corner(searchBg, 7)
     stroke(searchBg, T.Border, 1, 0.35)
     local searchBox = Instance.new("TextBox")
-    searchBox.Size=UDim2.new(1,-22,1,0); searchBox.Position=UDim2.new(0,10,0,0)
-    searchBox.BackgroundTransparency=1; searchBox.Text=""
-    searchBox.PlaceholderText="🔍 Поиск…"; searchBox.Font=Enum.Font.Gotham
-    searchBox.TextSize=10; searchBox.TextColor3=T.TextPrimary
-    searchBox.PlaceholderColor3=T.TextMuted; searchBox.ClearTextOnFocus=false
-    searchBox.Parent=searchBg
-    local searchCnt = lbl(searchBg,"",9,T.TextMuted,Enum.Font.Gotham,Enum.TextXAlignment.Right)
-    searchCnt.Size=UDim2.new(0,18,1,0); searchCnt.Position=UDim2.new(1,-20,0,0)
+    searchBox.Size             = UDim2.new(1, -22, 1, 0)
+    searchBox.Position         = UDim2.new(0, 10, 0, 0)
+    searchBox.BackgroundTransparency = 1
+    searchBox.Text             = ""
+    searchBox.PlaceholderText  = "🔍 Поиск…"
+    searchBox.Font             = Enum.Font.Gotham
+    searchBox.TextSize         = 10
+    searchBox.TextColor3       = T.TextPrimary
+    searchBox.PlaceholderColor3 = T.TextMuted
+    searchBox.ClearTextOnFocus = false
+    searchBox.Parent           = searchBg
+    local searchCnt = lbl(searchBg, "", 9, T.TextMuted, Enum.Font.Gotham, Enum.TextXAlignment.Right)
+    searchCnt.Size     = UDim2.new(0, 18, 1, 0)
+    searchCnt.Position = UDim2.new(1, -20, 0, 0)
 
-    -- версия внизу боковой панели
-    local sbVer = lbl(sb, "void ui v"..VoidUI.Version, 9, T.TextMuted, Enum.Font.Gotham, Enum.TextXAlignment.Center)
-    sbVer.Size=UDim2.new(1,0,0,14); sbVer.Position=UDim2.new(0,0,1,-20); sbVer.ZIndex=2
+    -- версия внизу боковой панели (абсолютная позиция, не через layout)
+    local sbVer = Instance.new("TextLabel")
+    sbVer.Size                  = UDim2.new(1, 0, 0, 14)
+    sbVer.Position              = UDim2.new(0, 0, 1, -16)
+    sbVer.BackgroundTransparency = 1
+    sbVer.Text                  = "void ui v" .. VoidUI.Version
+    sbVer.TextSize              = 8
+    sbVer.TextColor3            = T.TextMuted
+    sbVer.Font                  = Enum.Font.Gotham
+    sbVer.TextXAlignment        = Enum.TextXAlignment.Center
+    sbVer.ZIndex                = 2
+    sbVer.Parent                = sb
 
     -- контент-область
     local ca = Instance.new("Frame")
-    ca.Size=UDim2.new(1,-159,1,-44); ca.Position=UDim2.new(0,159,0,44)
-    ca.BackgroundTransparency=1; ca.ClipsDescendants=true; ca.Parent=mf
+    ca.Size                = UDim2.new(1, -159, 1, -44)
+    ca.Position            = UDim2.new(0, 159, 0, 44)
+    ca.BackgroundTransparency = 1
+    ca.ClipsDescendants    = true
+    ca.Parent              = mf
 
     -- ── перетаскивание ────────────────────────────────────────
     local dragging, dStart, dAbs = false, nil, nil
     local minimized = false
     tb.InputBegan:Connect(function(i)
-        if i.UserInputType==Enum.UserInputType.MouseButton1 then
-            dragging=true; dStart=i.Position; dAbs=mf.AbsolutePosition
+        if i.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dStart   = i.Position
+            dAbs     = mf.AbsolutePosition
+            -- normalize anchor to 0,0 for pixel dragging
+            mf.AnchorPoint = Vector2.new(0, 0)
+            mf.Position    = UDim2.new(0, dAbs.X, 0, dAbs.Y)
+            glwHolder.AnchorPoint = Vector2.new(0, 0)
+            glwHolder.Position    = UDim2.new(0, dAbs.X - 45, 0, dAbs.Y - 45)
         end
     end)
     UserInputService.InputChanged:Connect(function(i)
-        if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
-            local d=i.Position-dStart; local cvp=workspace.CurrentCamera.ViewportSize
-            local nx=math.clamp(dAbs.X+d.X,0,cvp.X-mf.AbsoluteSize.X)
-            local ny=math.clamp(dAbs.Y+d.Y,0,cvp.Y-mf.AbsoluteSize.Y)
-            mf.AnchorPoint=Vector2.new(0,0); mf.Position=UDim2.new(0,nx,0,ny)
+        if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
+            local d   = i.Position - dStart
+            local cvp = workspace.CurrentCamera.ViewportSize
+            local nx  = math.clamp(dAbs.X + d.X, 0, cvp.X - mf.AbsoluteSize.X)
+            local ny  = math.clamp(dAbs.Y + d.Y, 0, cvp.Y - mf.AbsoluteSize.Y)
+            mf.AnchorPoint    = Vector2.new(0, 0)
+            mf.Position       = UDim2.new(0, nx, 0, ny)
+            glwHolder.AnchorPoint = Vector2.new(0, 0)
+            glwHolder.Position    = UDim2.new(0, nx - 45, 0, ny - 45)
         end
     end)
     UserInputService.InputEnded:Connect(function(i)
@@ -925,9 +974,12 @@ function VoidUI:CreateWindow(opts)
 
     minBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
-        sb.Visible = not minimized; ca.Visible = not minimized
-        sizeC.MinSize = minimized and Vector2.new(minW,44) or Vector2.new(minW,minH)
-        sizeC.MaxSize = minimized and Vector2.new(maxW,44) or Vector2.new(maxW,maxH)
+        sb.Visible = not minimized
+        ca.Visible = not minimized
+        local newH = minimized and 44 or maxH
+        sizeC.MinSize = minimized and Vector2.new(minW, 44) or Vector2.new(minW, minH)
+        sizeC.MaxSize = minimized and Vector2.new(maxW, 44) or Vector2.new(maxW, maxH)
+        tw(mf, {Size = UDim2.new(0, maxW, 0, newH)}, TI.Spring)
         minBtn.Text = minimized and "□" or "─"
     end)
 
@@ -938,13 +990,19 @@ function VoidUI:CreateWindow(opts)
     end)
 
     closeBtn.MouseButton1Click:Connect(function()
-        tw(mf, {BackgroundTransparency=1, Size=UDim2.new(0,mf.AbsoluteSize.X,0,6)}, TI.Mid)
-        task.delay(0.28, function() sg:Destroy() end)
+        local curW = mf.AbsoluteSize.X
+        tw(mf, {BackgroundTransparency = 1, Size = UDim2.new(0, curW, 0, 6)}, TI.Mid)
+        tw(glwHolder, {BackgroundTransparency = 1}, TI.Mid)
+        task.delay(0.30, function() sg:Destroy() end)
     end)
 
     registerHotkey(tKey, function()
-        mf.Visible = not mf.Visible
-        if mf.Visible then tw(mf,{BackgroundTransparency=0},TI.Fast) end
+        mf.Visible      = not mf.Visible
+        glwHolder.Visible = mf.Visible
+        if mf.Visible then
+            mf.BackgroundTransparency = 1
+            tw(mf, {BackgroundTransparency = 0}, TI.Fast)
+        end
     end)
 
     -- ── Win object ────────────────────────────────────────────
@@ -1019,15 +1077,18 @@ function VoidUI:CreateWindow(opts)
 
         -- scrolling frame
         local scroll = Instance.new("ScrollingFrame")
-        scroll.Size=UDim2.new(1,0,1,0); scroll.BackgroundTransparency=1
-        scroll.BorderSizePixel=0; scroll.ScrollBarThickness=4
-        scroll.ScrollBarImageColor3=T.ScrollBar; scroll.ScrollBarImageTransparency=0.35
-        scroll.AutomaticCanvasSize=Enum.AutomaticSize.Y
-        scroll.CanvasSize=UDim2.new(0,0,0,0)
-        scroll.Visible=false; scroll.Parent=ca
+        scroll.Size                    = UDim2.new(1, 0, 1, 0)
+        scroll.BackgroundTransparency  = 1
+        scroll.BorderSizePixel         = 0
+        scroll.ScrollBarThickness      = 4
+        scroll.ScrollBarImageColor3    = T.ScrollBar
+        scroll.ScrollBarImageTransparency = 0.35
+        scroll.CanvasSize              = UDim2.new(0, 0, 0, 0)
+        scroll.Visible                 = false
+        scroll.Parent                  = ca
 
-        local sLayout = lst(scroll,5)
-        pad(scroll,10,14,10,12)
+        local sLayout = lst(scroll, 5)
+        pad(scroll, 10, 14, 10, 12)
         bindCanvas(scroll, sLayout)
 
         maid:Add(scroll.MouseEnter:Connect(function() tw(scroll,{ScrollBarImageTransparency=0},TI.Fast) end))
@@ -1067,9 +1128,8 @@ function VoidUI:CreateWindow(opts)
         local function lo() Tab._lo+=1; return Tab._lo end
 
         -- elem helper
-        local function elem(h, hasDesc, noHover)
-            local bh = hasDesc and (h+20) or h
-            local c = frm(scroll, UDim2.new(1,0,0,bh), nil, T.BgElement, 1)
+        local function elem(h, noHover)
+            local c = frm(scroll, UDim2.new(1, 0, 0, h), nil, T.BgElement, 1)
             c.LayoutOrder=lo(); c.AutomaticSize=Enum.AutomaticSize.Y
             corner(c,7); stroke(c,T.Border,1,0.4)
             task.defer(function() tw(c,{BackgroundTransparency=0},TI.Mid) end)
@@ -1164,17 +1224,19 @@ function VoidUI:CreateWindow(opts)
             local flag=opts2.Flag; local desc=opts2.Description
             local tVal=(flag and Win._saved[flag]~=nil) and Win._saved[flag] or (opts2.CurrentValue or false)
             local cb=opts2.Callback or function()end
-            local c=elem(38, desc); local val=tVal; reg(c,opts2.Name)
+            local c = elem(desc and 56 or 38); local val = tVal; reg(c, opts2.Name)
             if opts2.Tooltip then attachTooltip(c,opts2.Tooltip) end
 
             local iBtn=Instance.new("TextButton")
             iBtn.Size=UDim2.new(1,0,1,0); iBtn.BackgroundTransparency=1; iBtn.Text=""; iBtn.Parent=c
 
-            local nl=lbl(c,opts2.Name or "Toggle",12,T.TextPrimary,Enum.Font.GothamMedium)
-            nl.Size=UDim2.new(1,-66,0,18); nl.Position=UDim2.new(0,12,0,desc and 6 or 10)
+            local nl = lbl(c, opts2.Name or "Toggle", 12, T.TextPrimary, Enum.Font.GothamMedium)
+            nl.Size     = UDim2.new(1, -66, 0, 18)
+            nl.Position = UDim2.new(0, 12, 0, desc and 8 or 10)
             if desc then
-                local dl=lbl(c,desc,10,T.TextMuted)
-                dl.Size=UDim2.new(1,-66,0,14); dl.Position=UDim2.new(0,12,0,26)
+                local dl = lbl(c, desc, 10, T.TextMuted)
+                dl.Size     = UDim2.new(1, -66, 0, 14)
+                dl.Position = UDim2.new(0, 12, 0, 30)
             end
 
             local tbg=frm(c,UDim2.new(0,42,0,23),UDim2.new(1,-56,0.5,-11.5),tVal and T.Accent or T.AccentFaded,0)
@@ -1275,7 +1337,7 @@ function VoidUI:CreateWindow(opts)
         function Tab:CreateButton(opts2)
             local desc=opts2.Description
             local cb=opts2.Callback or function()end
-            local c=elem(36,desc); c.ClipsDescendants=true; reg(c,opts2.Name)
+            local c = elem(desc and 56 or 36); c.ClipsDescendants = true; reg(c, opts2.Name)
             if opts2.Tooltip then attachTooltip(c,opts2.Tooltip) end
 
             local nl=lbl(c,opts2.Name or "Button",12,T.TextPrimary,Enum.Font.GothamMedium,Enum.TextXAlignment.Center)
